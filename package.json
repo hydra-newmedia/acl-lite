@@ -1,0 +1,28 @@
+{
+  "name": "acl-lite",
+  "version": "0.1.0",
+  "description": "A lightweight and simple ACL module",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/nyc ./node_modules/.bin/ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guischdi/acl-lite.git"
+  },
+  "keywords": [
+    "acl",
+    "permissions",
+    "roles"
+  ],
+  "author": "Christian Hotz <hotz@hydra-newmedia.com> (http://www.hydra-newmedia.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/guischdi/acl-lite/issues"
+  },
+  "homepage": "https://github.com/guischdi/acl-lite#readme",
+  "devDependencies": {
+    "ava": "^0.16.0",
+    "nyc": "^8.3.2"
+  }
+}
