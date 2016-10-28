@@ -8,7 +8,7 @@ class Role {
    * permissions to initially grant permissions to the newly created {Role}
    */
   constructor(permissions) {
-    this.permissions = new Map();
+    this.permissions = {};
 
     if (permissions)
       permissions.map(permission => this.addPermission(permission));
@@ -24,12 +24,21 @@ class Role {
     else if (!(permission instanceof Array))
       throw new TypeError('permission must be of type array or string');
 
-    // set permissions for all nodes in the tree, from root to leaf
-    for (let i = 0, key = ''; i < permission.length; i++) {
-      if (i > 0) key += '.';
-      key +=  permission[i];
-      this.permissions.set(key, true);
+    // set permission object as tree
+    this.traversPermission(permission, this.permissions);
+  }
+
+  traversPermission(path, permissionObject) {
+    if (permissionObject === true) {
+      console.log(path);
+      return;
     }
+    let key = path[0];
+    if (path.length === 1)
+      permissionObject[key] = true;
+    else
+      permissionObject[key] = {};
+    this.traversPermission(path.slice(1), permissionObject[key]);
   }
 
   /**
