@@ -37,7 +37,7 @@ class Role {
     if (path.length === 1)
       permissionObject[key] = true;
     else
-      permissionObject[key] = {};
+      permissionObject[key] = permissionObject[key] || {};
     this.traversPermission(path.slice(1), permissionObject[key]);
   }
 
