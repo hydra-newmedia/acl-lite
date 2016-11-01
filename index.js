@@ -25,20 +25,22 @@ class Role {
       throw new TypeError('permission must be of type array or string');
 
     // set permission object as tree
-    this.traversPermission(permission, this.permissions);
+    this.deepAddPermission(permission);
   }
 
-  traversPermission(path, permissionObject) {
-    if (permissionObject === true) {
-      console.log(path);
-      return;
-    }
+  /**
+   * Recursive method to add object tree of permission to this.permissions
+   * @param {Array.<string>} path - path to be added to the permissions
+   * @param {Object} [permissions=this.permissions] - permissions object new permissions should be added to
+   */
+  deepAddPermission(path, permissions = this.permissions) {
+    if (permissions === true) return;
     let key = path[0];
     if (path.length === 1)
-      permissionObject[key] = true;
+      permissions[key] = true;
     else
-      permissionObject[key] = permissionObject[key] || {};
-    this.traversPermission(path.slice(1), permissionObject[key]);
+      permissions[key] = permissions[key] || {};
+    this.deepAddPermission(path.slice(1), permissions[key]);
   }
 
   /**
