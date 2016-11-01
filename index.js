@@ -47,12 +47,25 @@ class Role {
    * @returns {boolean} - whether the {Role} is granted permissions to the node or not
    */
   hasPermission(permission) {
-    if (permission instanceof Array)
-      permission = permission.join('.');
-    else if (typeof(permission) !== 'string')
+    if (typeof(permission) === 'string')
+      permission = permission.split('.');
+    else if (!(permission instanceof Array))
       throw new TypeError('permission must be of type array or string');
 
-    return this.permissions.has(permission);
+    return this.deepHasPermission(permission);
+  }
+
+  /**
+   * Recursive method for finding whether a permission exists.
+   * @param {Array.<string>} path - permission to search for
+   * @param {Object} [permissions=this.permissions] - permissions object to search in
+   * @returns {boolean} - true if subobject with value true exists on traversing the `path`
+   */
+  deepHasPermission(path, permissions = this.permissions) {
+    if (path.length === 0) return false;
+    let key = path[0];
+    if (permissions[key] === true) return true;
+    else return this.deepHasPermission(path.slice(1), permissions[key]);
   }
 
 }
