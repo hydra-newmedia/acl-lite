@@ -66,6 +66,7 @@ class Role {
   deepHasPermission(path, permissions = this.permissions) {
     if (path.length === 0) return false;
     let key = path[0];
+    if (path.length === 1) return !!permissions[key];
     if (permissions[key] === true) return true;
     else return this.deepHasPermission(path.slice(1), permissions[key]);
   }
