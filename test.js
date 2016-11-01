@@ -108,3 +108,129 @@ test('hasPermission - error if not string or array provided', t => {
   t.throws(() => role.hasPermission(new Date()), TypeError);
   t.throws(() => role.hasPermission(new Date()), 'permission must be of type array or string');
 });
+
+test('checkObject - true if object satisfies permissions', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+
+  t.true(role.checkObject({
+    a: {
+      b: {
+        c: 'test',
+      }
+    },
+    b: {
+      c: 'test',
+    },
+  }));
+
+  t.true(role.checkObject({
+    a: {
+      b: 'test',
+    },
+    b: 'test',
+  }));
+});
+
+test('checkObject - false if object does not satisfiy permissions', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+
+  t.is('a.b.d', role.checkObject({
+    a: {
+      b: {
+        c: 'test',
+        d: 'test',
+      },
+    },
+    b: {
+      c: 'test',
+    },
+  }));
+
+  t.is('a.b.c.d', role.checkObject({
+    a: {
+      b: {
+        c: {
+          d: 'test',
+        },
+      },
+    },
+  }));
+
+  t.is('x', role.checkObject({
+    a: {
+      b: {
+        c: 'test',
+      },
+    },
+    x: 'test',
+  }));
+});
+
+test('checkObject - false if no object', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+
+  t.false(role.checkObject('test'));
+});
+
+
+test('checkObject - correct return if for sub-permissions', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+
+  t.true(role.checkObject({
+    a: {
+      b: {
+        c: 'test',
+      }
+    },
+    b: {
+      c: 'test',
+    },
+  }, 'obj.w'));
+
+  t.true(role.checkObject({
+    a: {
+      b: 'test',
+    },
+    b: 'test',
+  }, ['obj', 'w']));
+
+  t.is('a.b.d', role.checkObject({
+    a: {
+      b: {
+        c: 'test',
+        d: 'test',
+      },
+    },
+    b: {
+      c: 'test',
+    },
+  }, 'obj.w'));
+
+  t.is('a.b.c.d', role.checkObject({
+    a: {
+      b: {
+        c: {
+          d: 'test',
+        },
+      },
+    },
+  }, ['obj', 'w']));
+
+  t.is('x', role.checkObject({
+    a: {
+      b: {
+        c: 'test',
+      },
+    },
+    x: 'test',
+  }, 'obj.w'));
+
+  t.false(role.checkObject('test', 'obj.w'));
+  t.false(role.checkObject('test', ['obj', 'w']));
+});
+
+test('checkObject - error if no string or array path provided', t => {
+  const role = new Role();
+  t.throws(() => role.checkObject({}, new Date()), TypeError);
+  t.throws(() => role.checkObject({}, new Date()), 'path must be of type array or string');
+});

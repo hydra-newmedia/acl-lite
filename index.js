@@ -70,6 +70,50 @@ class Role {
     else return this.deepHasPermission(path.slice(1), permissions[key]);
   }
 
+  /**
+   * Check whether an object matches the permissions (or a sub-permission) of the role.
+   * @param {Object} object - object to be checked
+   * @param {string|Array.<string>} [path] - path of a sub-permission the object should be checked against (instead of root permission)
+   * @returns {boolean|string} - true if object satisfies permissions, false if it's no object or
+   * a path {string} of the first property, which is not permitted
+   */
+  checkObject(object, path = null) {
+    if (path && typeof path === 'string')
+      path = path.split('.');
+    else if (path && !(path instanceof Array))
+      throw new TypeError('path must be of type array or string');
+
+    if (path) {
+      let permissions = this.permissions;
+      for (let i = 0; i < path.length; i++) {
+        permissions = permissions[path[i]];
+      }
+      return this.deepCheckObject(object, permissions);
+    } else {
+      return this.deepCheckObject(object, this.permissions);
+    }
+  }
+
+  /**
+   * Recursive method for checking permissions on an object, aborts if no permissions or not an object
+   * @param {Object|*} object
+   * @param {Object|boolean|*} permissions
+   * @param {string} [path='']
+   * @returns {boolean|string} - path when aborting, false if non-object, true if completely permitted
+   */
+  deepCheckObject(object, permissions, path = '') {
+    if (!permissions) return path;
+    if (object.constructor === {}.constructor) {
+      for (let key in object) {
+        const subCheck = this.deepCheckObject(object[key], permissions[key], path + (path === '' ? key : '.' + key));
+        if (subCheck !== true) return subCheck;
+      }
+    } else if (path === '') {
+      return false;
+    }
+    return true;
+  }
+
 }
 
 // alias Role.can() for Role.hasPermission()
