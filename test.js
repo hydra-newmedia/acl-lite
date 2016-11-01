@@ -3,82 +3,72 @@
 const test = require('ava');
 const Role = require('./index');
 
-test('constructor - empty permissions map', t => {
+test('constructor - empty permissions object', t => {
   const role = new Role();
   t.truthy(role instanceof Role);
-  t.is(role.permissions.size, 0);
+  t.deepEqual(role.permissions, {});
 });
 
-test('constructor - multi permissions map', t => {
+test('constructor - multi permissions object', t => {
   const role = new Role(['a.b', 'a.b.c', 'b.c']);
   t.truthy(role instanceof Role);
-  t.truthy(role.permissions.size === 5);
-  [
-    ['a', true],
-    ['a.b', true],
-    ['a.b.c', true],
-    ['b', true],
-    ['b.c', true],
-  ].forEach(permission => t.truthy(role.permissions.has(permission[0])));
+  t.deepEqual(role.permissions, { a: { b: true }, b: { c: true }});
 });
 
 test('addPermission - add string formatted permission', t => {
   const role = new Role(['a.b', 'b']);
-  const permissions = [
-    ['a', true],
-    ['a.b', true],
-    ['b', true],
-  ];
+  const permissions = {
+    a: {
+      b: true,
+    },
+    b: true,
+  };
 
   role.addPermission('a.b.c');
-  t.is(role.permissions.size, 4);
-  permissions.push(['a.b.c']);
-  permissions.forEach(permission => t.truthy(role.permissions.has(permission[0])));
+  t.deepEqual(role.permissions, permissions);
 
   role.addPermission('b.c');
-  t.is(role.permissions.size, 5);
-  permissions.push(['b.c']);
-  permissions.forEach(permission => t.truthy(role.permissions.has(permission[0])));
+  t.deepEqual(role.permissions, permissions);
+
+  role.addPermission('c.d');
+  permissions['c'] = { d: true };
+  t.deepEqual(role.permissions, permissions);
+
+  role.addPermission('a.b');
+  permissions.a.b = true ;
+  t.deepEqual(role.permissions, permissions);
+
+  role.addPermission('a');
+  permissions.a = true;
+  t.deepEqual(role.permissions, permissions);
 });
 
 test('addPermission - add array permission', t => {
-  const role = new Role(['a.b', 'b']);
-  const permissions = [
-    ['a', true],
-    ['a.b', true],
-    ['b', true],
-  ];
+  const role = new Role([['a', 'b'], ['b']]);
+  const permissions = {
+    a: {
+      b: true,
+    },
+    b: true,
+  };
 
   role.addPermission(['a', 'b', 'c']);
-  t.is(role.permissions.size, 4);
-  permissions.push(['a.b.c']);
-  permissions.forEach(permission => t.truthy(role.permissions.has(permission[0])));
+  t.deepEqual(role.permissions, permissions);
 
   role.addPermission(['b', 'c']);
-  t.is(role.permissions.size, 5);
-  permissions.push(['b.c']);
-  permissions.forEach(permission => t.truthy(role.permissions.has(permission[0])));
-});
+  t.deepEqual(role.permissions, permissions);
 
-test('addPermission - no change on already added permissions', t => {
-  const role = new Role(['a.b.c']);
-  const permissions = [
-    ['a', true],
-    ['a.b', true],
-    ['a.b.c', true],
-  ];
-
-  role.addPermission('a.b.c');
-  t.is(role.permissions.size, 3);
-  permissions.forEach(permission => t.truthy(role.permissions.has(permission[0])));
+  role.addPermission(['c', 'd']);
+  permissions['c'] = { d: true };
+  t.deepEqual(role.permissions, permissions);
 
   role.addPermission(['a', 'b']);
-  t.is(role.permissions.size, 3);
-  permissions.forEach(permission => t.truthy(role.permissions.has(permission[0])));
+  permissions.a.b = true ;
+  t.deepEqual(role.permissions, permissions);
 
   role.addPermission(['a']);
-  t.is(role.permissions.size, 3);
-  permissions.forEach(permission => t.truthy(role.permissions.has(permission[0])));
+  permissions.a = true;
+  t.deepEqual(role.permissions, permissions);
 });
 
 test('addPermission - error if not string or array', t => {
@@ -94,17 +84,17 @@ test('hasPermission - true if permission exists', t => {
 });
 
 test('hasPermission - true if sup-permission exists', t => {
-  const role = new Role(['a.b.c']);
-  t.true(role.hasPermission('a.b'));
-  t.true(role.hasPermission(['a', 'b']));
-  t.true(role.hasPermission('a'));
-  t.true(role.hasPermission(['a']));
+  const role = new Role(['a.b.c', 'b.c', 'c']);
+  t.true(role.hasPermission('a.b.c.d'));
+  t.true(role.hasPermission(['a', 'b', 'c', 'd']));
+  t.true(role.hasPermission('b.c.d'));
+  t.true(role.hasPermission(['b', 'c', 'd']));
+  t.true(role.hasPermission('c.d'));
+  t.true(role.hasPermission(['c', 'd']));
 });
 
 test('hasPermission - false if no permission exists', t => {
   const role = new Role(['a.b.c', 'b.c']);
-  t.false(role.hasPermission('b.c.d'));
-  t.false(role.hasPermission(['b', 'c', 'd']));
   t.false(role.hasPermission('a.b.f'));
   t.false(role.hasPermission(['a', 'b', 'f']));
   t.false(role.hasPermission('x.y.z'));

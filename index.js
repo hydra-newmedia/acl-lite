@@ -8,7 +8,7 @@ class Role {
    * permissions to initially grant permissions to the newly created {Role}
    */
   constructor(permissions) {
-    this.permissions = new Map();
+    this.permissions = {};
 
     if (permissions)
       permissions.map(permission => this.addPermission(permission));
@@ -24,12 +24,23 @@ class Role {
     else if (!(permission instanceof Array))
       throw new TypeError('permission must be of type array or string');
 
-    // set permissions for all nodes in the tree, from root to leaf
-    for (let i = 0, key = ''; i < permission.length; i++) {
-      if (i > 0) key += '.';
-      key +=  permission[i];
-      this.permissions.set(key, true);
-    }
+    // set permission object as tree
+    this.deepAddPermission(permission);
+  }
+
+  /**
+   * Recursive method to add object tree of permission to this.permissions
+   * @param {Array.<string>} path - path to be added to the permissions
+   * @param {Object} [permissions=this.permissions] - permissions object new permissions should be added to
+   */
+  deepAddPermission(path, permissions = this.permissions) {
+    if (permissions === true) return;
+    let key = path[0];
+    if (path.length === 1)
+      permissions[key] = true;
+    else
+      permissions[key] = permissions[key] || {};
+    this.deepAddPermission(path.slice(1), permissions[key]);
   }
 
   /**
@@ -38,12 +49,25 @@ class Role {
    * @returns {boolean} - whether the {Role} is granted permissions to the node or not
    */
   hasPermission(permission) {
-    if (permission instanceof Array)
-      permission = permission.join('.');
-    else if (typeof(permission) !== 'string')
+    if (typeof(permission) === 'string')
+      permission = permission.split('.');
+    else if (!(permission instanceof Array))
       throw new TypeError('permission must be of type array or string');
 
-    return this.permissions.has(permission);
+    return this.deepHasPermission(permission);
+  }
+
+  /**
+   * Recursive method for finding whether a permission exists.
+   * @param {Array.<string>} path - permission to search for
+   * @param {Object} [permissions=this.permissions] - permissions object to search in
+   * @returns {boolean} - true if subobject with value true exists on traversing the `path`
+   */
+  deepHasPermission(path, permissions = this.permissions) {
+    if (path.length === 0) return false;
+    let key = path[0];
+    if (permissions[key] === true) return true;
+    else return this.deepHasPermission(path.slice(1), permissions[key]);
   }
 
 }
