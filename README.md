@@ -1,8 +1,7 @@
-# ACL-lite
+[![NPM version][npm-image]][npm-url]
+[![NPM downloads][downloads-image]][download-url]
 
-A lightweight and simple ACL module.
-
-## The Permissions logic
+# The Permissions logic
 
 This module allows you to grant object permissions to Roles.
 You can specify a role with certain permissions by simply requiring 
@@ -59,3 +58,9 @@ This returns the path of the first property which the role has no
 permissions for. In this example the role also has no permissions
 to `a.bb` and `aa`. (Note: `x.y.z` is alright as the role is 
 granted permission to its parent `x.y`!)
+
+
+[npm-url]: https://npmjs.org/package/acl-lite
+[download-url]: https://npmjs.org/package/acl-lite
+[npm-image]: https://img.shields.io/npm/v/acl-lite.svg?style=flat
+[downloads-image]: https://img.shields.io/npm/dm/acl-lite.svg?style=flat
