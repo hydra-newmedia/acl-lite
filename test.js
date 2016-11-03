@@ -234,3 +234,9 @@ test('checkObject - error if no string or array path provided', t => {
   t.throws(() => role.checkObject({}, new Date()), TypeError);
   t.throws(() => role.checkObject({}, new Date()), 'path must be of type array or string');
 });
+
+test('checkObject - error if no invalid path provided', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+  t.throws(() => role.checkObject({}, 'a.b'), Error);
+  t.throws(() => role.checkObject({}, 'a.b'), 'invalid path to sub-permission');
+});

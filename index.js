@@ -86,8 +86,9 @@ class Role {
 
     if (path) {
       let permissions = this.permissions;
-      for (let i = 0; i < path.length; i++) {
-        permissions = permissions[path[i]];
+      for (let key of path) {
+        if (!(key in permissions)) throw new Error('invalid path to sub-permission', 'InvalidPermissionPathError');
+        permissions = permissions[key];
       }
       return this.deepCheckObject(object, permissions);
     } else {
