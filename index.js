@@ -117,6 +117,41 @@ class Role {
     return true;
   }
 
+  /**
+   * Get (sub-)permissions in a flatted object.
+   * @param {string|Array.<string>} [path] - optional sub-permission path to get permissions of
+   * @param {*} [value=true] - value the flatted object should hold, eg. 1 for mongoose filtering
+   * @returns {Object} - flatted (sub-)permissions object
+   */
+  getFlatPermissions(path = null, value = true) {
+    if (path && typeof path === 'string')
+      path = path.split('.');
+    else if (path && !(path instanceof Array))
+      throw new TypeError('path must be of type array or string');
+    else if (!path)
+      path = [];
+
+    let permissions = this.permissions;
+    for (let key of path) {
+      if (!(key in permissions))
+        throw new Error('invalid path to sub-permission', 'InvalidPermissionPathError');
+      permissions = permissions[key];
+    }
+
+    let flatted = {};
+    let deepFlatten = (object, path = '') => {
+      for (let key in object) {
+        let flatPath = path + (path === '' ? key : '.' + key);
+        if (object[key] === true)
+          flatted[flatPath] = value;
+        else
+          deepFlatten(object[key], flatPath);
+      }
+    };
+    deepFlatten(permissions);
+    return flatted;
+  }
+
 }
 
 // alias Role.can() for Role.hasPermission()
