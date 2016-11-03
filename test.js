@@ -288,3 +288,91 @@ test('getFlatPermissions - return flatted sub-permissions with specified value',
     'obj.w.b.c': false,
   });
 });
+
+test('filterObject - return stripped object relating to permission', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  const obj = {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+    x: {
+      y: 'test',
+    },
+  };
+  t.deepEqual(role.filterObject(obj), {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+  });
+});
+
+test('filterObject - return stripped object relating to sub-permission', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+  const obj = {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+    x: {
+      y: 'test',
+    },
+  };
+  t.deepEqual(role.filterObject(obj, 'obj.w'), {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+  });
+});
+
+test('filterObject - return stripped object relating to leaf sub-permission', t => {
+  const role = new Role(['a']);
+  const obj = { x: 'test' };
+  t.deepEqual(role.filterObject(obj, 'a'), { x: 'test' });
+});
+
+test('filterObject - manipulate input object', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  const obj = {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+    x: {
+      y: 'test',
+    },
+  };
+  role.filterObject(obj);
+  t.deepEqual(obj, {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+  });
+});
+
+test('filterObject - error if no string or array path provided', t => {
+  const role = new Role();
+  t.throws(() => role.filterObject({}, new Date()), TypeError);
+  t.throws(() => role.filterObject({}, new Date()), 'path must be of type array or string');
+});
+
+test('filterObject - error if invalid path provided', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+  t.throws(() => role.filterObject({}, 'a.b'), Error);
+  t.throws(() => role.filterObject({}, 'a.b'), 'invalid path to sub-permission');
+});
