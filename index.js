@@ -17,6 +17,7 @@ class Role {
   /**
    * Add a permission for a node (eg. object property) to the {Role}
    * @param {string|Array.<string>} permission - the path to the node to grant permissions to
+   * @throws {TypeError} if the provided permission is neither {string} nor {Array.<string>}
    */
   addPermission(permission) {
     if (typeof(permission) === 'string')
@@ -41,6 +42,7 @@ class Role {
    * Check whether the {Role} has permissions for a specific node (eg. object property)
    * @param {string|Array.<string>} permission - the path to be checked against
    * @returns {boolean} - whether the {Role} is granted permissions to the node or not
+   * @throws {TypeError} if the provided permission is neither {string} nor {Array.<string>}
    */
   hasPermission(permission) {
     if (typeof(permission) === 'string')
@@ -61,7 +63,8 @@ class Role {
   /**
    * Check whether an object matches the permissions (or a sub-permission) of the role.
    * @param {Object} object - object to be checked
-   * @param {string|Array.<string>} [path] - path of a sub-permission the object should be checked against (instead of root permission)
+   * @param {string|Array.<string>} [path] - path of a sub-permission the object
+   * should be checked against (instead of root permission)
    * @returns {boolean|string} - true if object satisfies permissions, false if it's no object or
    * a path {string} of the first property, which is not permitted
    */
@@ -82,14 +85,6 @@ class Role {
   }
 
   /**
-   * Recursive method for checking permissions on an object, aborts if no permissions or not an object
-   * @param {Object|*} object
-   * @param {Object|boolean|*} permissions
-   * @param {string} [path='']
-   * @returns {boolean|string} - path when aborting, false if non-object, true if completely permitted
-   */
-
-  /**
    * Get (sub-)permissions in a flatted object.
    * @param {string|Array.<string>} [path] - optional sub-permission path to get permissions of
    * @param {*} [value=true] - value the flatted object should hold, eg. 1 for mongoose filtering
@@ -99,7 +94,7 @@ class Role {
     let permissions = this.getSubPermissions(path);
 
     let flatted = {};
-    let deepFlatten = (object, path = '') => {
+    const deepFlatten = (object, path = '') => {
       for (let key in object) {
         let flatPath = path + (path === '' ? key : '.' + key);
         if (object[key] === true)
@@ -114,7 +109,7 @@ class Role {
 
   /**
    * Get sub-permissions of this {Role}
-   * @param {string} [path] - path to the sub-permissions
+   * @param {string|Array.<string>} [path] - path to the sub-permissions
    * @returns {Object|boolean}
    * @throws {TypeError} if the path is not string or Array.<string>
    * @throws {Error} if the path is invalid (does not exists on this {Role}s permissions member}
