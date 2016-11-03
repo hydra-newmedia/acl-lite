@@ -240,3 +240,51 @@ test('checkObject - error if invalid path provided', t => {
   t.throws(() => role.checkObject({}, 'a.b'), Error);
   t.throws(() => role.checkObject({}, 'a.b'), 'invalid path to sub-permission');
 });
+
+test('getFlatPermissions - return flatted permissions', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  t.deepEqual(role.getFlatPermissions(), {
+    'a.b.c': true,
+    'b.c': true,
+  });
+});
+
+test('getFlatPermissions - return flatted sub-permissions', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+  t.deepEqual(role.getFlatPermissions('obj.w'), {
+    'a.b.c': true,
+    'b.c': true,
+  });
+  t.deepEqual(role.getFlatPermissions(['obj', 'w']), {
+    'a.b.c': true,
+    'b.c': true,
+  });
+});
+
+test('getFlatPermissions - error if no string or array path provided', t => {
+  const role = new Role();
+  t.throws(() => role.getFlatPermissions(new Date()), TypeError);
+  t.throws(() => role.getFlatPermissions(new Date()), 'path must be of type array or string');
+});
+
+test('getFlatPermissions - error if invalid path provided', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+  t.throws(() => role.getFlatPermissions('a.b'), Error);
+  t.throws(() => role.getFlatPermissions('a.b'), 'invalid path to sub-permission');
+});
+
+test('getFlatPermissions - return flatted sub-permissions with specified value', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+  t.deepEqual(role.getFlatPermissions('obj.w', 'test'), {
+    'a.b.c': 'test',
+    'b.c': 'test',
+  });
+  t.deepEqual(role.getFlatPermissions(['obj', 'w'], 1), {
+    'a.b.c': 1,
+    'b.c': 1,
+  });
+  t.deepEqual(role.getFlatPermissions(null, false), {
+    'obj.w.a.b.c': false,
+    'obj.w.b.c': false,
+  });
+});
