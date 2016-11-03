@@ -85,6 +85,31 @@ class Role {
   }
 
   /**
+   * Filter arbitrary object realting to the permission of this {Role}
+   * @param {Object} object - object to be filtered
+   * @param {string|Array.<string>} [path] - path to a sub-permission the object should be filtered by
+   * @returns {Object} - stripped input object
+   */
+  filterObject(object, path = undefined) {
+    let permissions = this.getSubPermissions(path);
+
+    const recursiveFilterObject = (object, permissions) => {
+      if (permissions === true)
+        return object;
+      if (object.constructor === {}.constructor) {
+        for (let key in object) {
+          if (permissions[key])
+            object[key] = recursiveFilterObject(object[key], permissions[key]);
+          else
+            delete object[key];
+        }
+      }
+      return object;
+    };
+    return recursiveFilterObject(object, permissions);
+  }
+
+  /**
    * Get (sub-)permissions in a flatted object.
    * @param {string|Array.<string>} [path] - optional sub-permission path to get permissions of
    * @param {*} [value=true] - value the flatted object should hold, eg. 1 for mongoose filtering
