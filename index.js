@@ -78,7 +78,7 @@ class Role {
       }
       return true;
     };
-    return recursiveCheckObject(object, this.getSubPermission(path));
+    return recursiveCheckObject(object, this.getSubPermissions(path));
   }
 
   /**
@@ -96,7 +96,7 @@ class Role {
    * @returns {Object} - flatted (sub-)permissions object
    */
   getFlatPermissions(path = undefined, value = true) {
-    let permissions = this.getSubPermission(path);
+    let permissions = this.getSubPermissions(path);
 
     let flatted = {};
     let deepFlatten = (object, path = '') => {
@@ -112,7 +112,14 @@ class Role {
     return flatted;
   }
 
-  getSubPermission(path = null) {
+  /**
+   * Get sub-permissions of this {Role}
+   * @param {string} [path] - path to the sub-permissions
+   * @returns {Object|boolean}
+   * @throws {TypeError} if the path is not string or Array.<string>
+   * @throws {Error} if the path is invalid (does not exists on this {Role}s permissions member}
+   */
+  getSubPermissions(path = null) {
     if (!path)
       path = [];
     else if (typeof path === 'string')
