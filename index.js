@@ -17,6 +17,28 @@ class Role {
   }
 
   /**
+   * Merge other {Role}'s permissions into this {Role}
+   * @param {Array.<Role>|Role} roles - other roles to be merged into this one
+   * @return {Role} this
+   * @throws {TypeError} if roles is not of type {Role} or {Array.<Role>}
+   */
+  merge(roles) {
+    if (roles instanceof Role)
+      roles = [roles];
+    else if (!(roles instanceof Array))
+      throw new TypeError('roles must be of type array or Role');
+
+    for (let role of roles) {
+      if (!(role instanceof Role))
+        throw new TypeError('roles must be of type Array.<Role>');
+      for (let permission of Object.keys(role.getFlatPermissions())) {
+        this.addPermission(permission);
+      }
+    }
+    return this;
+  }
+
+  /**
    * Set preformatted permissions object (NOT array of string permissions)
    * @param {Object} permissions - permissions object to be set
    * @throws {Error} if the permissions object is of invalid format
