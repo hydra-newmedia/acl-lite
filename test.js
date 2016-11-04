@@ -15,6 +15,54 @@ test('constructor - multi permissions object', t => {
   t.deepEqual(role.permissions, { a: { b: true }, b: { c: true }});
 });
 
+test('setPermissions - set correctly formatted permission', t => {
+  const role = new Role();
+  const permissions = {
+    a: {
+      b: {
+        c: true,
+      },
+    },
+    b: {
+      c: true,
+    },
+  };
+  role.setPermissions(permissions);
+  t.deepEqual(role.permissions, permissions);
+});
+
+test('setPermissions - error on empty sub-permission object', t => {
+  const role = new Role();
+  const permissions = {
+    a: {
+      b: {},
+    },
+    b: {
+      c: true,
+    },
+  };
+  t.throws(() => role.setPermissions(permissions), Error);
+  t.throws(() => role.setPermissions(permissions), 'invalid permissions object');
+  t.throws(() => role.setPermissions({}), Error);
+  t.throws(() => role.setPermissions({}), 'invalid permissions object');
+});
+
+test('setPermissions - error on invalid sub-permission', t => {
+  const role = new Role();
+  const permissions = {
+    a: {
+      b: false,
+    },
+    b: {
+      c: true,
+    },
+  };
+  t.throws(() => role.setPermissions(permissions), Error);
+  t.throws(() => role.setPermissions(permissions), 'invalid permissions object');
+  t.throws(() => role.setPermissions(false), Error);
+  t.throws(() => role.setPermissions(false), 'invalid permissions object');
+});
+
 test('addPermission - add string formatted permission', t => {
   const role = new Role(['a.b', 'b']);
   const permissions = {
