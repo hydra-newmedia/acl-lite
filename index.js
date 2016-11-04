@@ -15,6 +15,8 @@ class Role {
         this.setPermissions(permissions);
       else if (permissions.constructor === Array)
         permissions.map(permission => this.addPermission(permission));
+      else
+        throw new TypeError('permissions must be Object or Array.<string|Array.<string>>');
     }
   }
 

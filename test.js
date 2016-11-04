@@ -5,14 +5,24 @@ const Role = require('./index');
 
 test('constructor - empty permissions object', t => {
   const role = new Role();
-  t.truthy(role instanceof Role);
+  t.true(role instanceof Role);
   t.deepEqual(role.permissions, {});
 });
 
 test('constructor - multi permissions object', t => {
   const role = new Role(['a.b', 'a.b.c', 'b.c']);
-  t.truthy(role instanceof Role);
+  t.true(role instanceof Role);
   t.deepEqual(role.permissions, { a: { b: true }, b: { c: true }});
+});
+
+test('constructor - boolean', t => {
+  let role = new Role(true);
+  t.true(role instanceof Role);
+  t.true(role.permissions);
+});
+
+test('constructor - invalid permissions object', t => {
+  t.throws(() => new Role(new Date()), TypeError);
 });
 
 const mergedResult = {
