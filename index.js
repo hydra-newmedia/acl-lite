@@ -10,10 +10,12 @@ class Role {
   constructor(permissions) {
     this.permissions = {};
 
-    if (permissions.constructor === {}.constructor || permissions.constructor === Boolean)
-      this.setPermissions(permissions);
-    else if (permissions)
-      permissions.map(permission => this.addPermission(permission));
+    if (permissions) {
+      if (permissions.constructor === {}.constructor || permissions.constructor === Boolean)
+        this.setPermissions(permissions);
+      else if (permissions.constructor === Array)
+        permissions.map(permission => this.addPermission(permission));
+    }
   }
 
   /**
