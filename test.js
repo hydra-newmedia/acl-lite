@@ -101,6 +101,8 @@ test('hasPermission - false if no permission exists', t => {
   t.false(role.hasPermission(['x', 'y', 'z']));
   t.false(role.hasPermission('x'));
   t.false(role.hasPermission(['x']));
+  t.false(role.hasPermission(''));
+  t.false(role.hasPermission([]));
 });
 
 test('hasPermission - error if not string or array provided', t => {

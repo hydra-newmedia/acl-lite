@@ -85,7 +85,7 @@ class Role {
   }
 
   /**
-   * Filter arbitrary object realting to the permission of this {Role}
+   * Filter arbitrary object relating to the permission of this {Role}
    * @param {Object} object - object to be filtered
    * @param {string|Array.<string>} [path] - path to a sub-permission the object should be filtered by
    * @returns {Object} - stripped input object
