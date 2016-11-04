@@ -4,14 +4,65 @@ class Role {
 
   /**
    * Constructor for an acl-lite {Role}
-   * @param {Array.<string|Array.<string>>} [permissions] - an array of
+   * @param {Array.<string|Array.<string>>|Object} [permissions] - an array of
    * permissions to initially grant permissions to the newly created {Role}
    */
   constructor(permissions) {
     this.permissions = {};
 
-    if (permissions)
-      permissions.map(permission => this.addPermission(permission));
+    if (permissions) {
+      if (permissions.constructor === {}.constructor || permissions.constructor === Boolean)
+        this.setPermissions(permissions);
+      else if (permissions.constructor === Array)
+        permissions.map(permission => this.addPermission(permission));
+      else
+        throw new TypeError('permissions must be Object or Array.<string|Array.<string>>');
+    }
+  }
+
+  /**
+   * Merge other {Role}'s permissions into this {Role}
+   * @param {Array.<Role>|Role} roles - other roles to be merged into this one
+   * @return {Role} this
+   * @throws {TypeError} if roles is not of type {Role} or {Array.<Role>}
+   */
+  merge(roles) {
+    if (roles instanceof Role)
+      roles = [roles];
+    else if (!(roles instanceof Array))
+      throw new TypeError('roles must be of type array or Role');
+
+    for (let role of roles) {
+      if (!(role instanceof Role))
+        throw new TypeError('roles must be of type Array.<Role>');
+      for (let permission of Object.keys(role.getFlatPermissions())) {
+        this.addPermission(permission);
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Set preformatted permissions object (NOT array of string permissions)
+   * @param {Object} permissions - permissions object to be set
+   * @throws {Error} if the permissions object is of invalid format
+   */
+  setPermissions(permissions) {
+    const invalid = new Error('invalid permissions object', 'InvalidPermissionsObjectError');
+    const recursiveCheckValid = (permissions) => {
+      let count = 0;
+      if (permissions.constructor === {}.constructor) {
+        for (let key in permissions) {
+          recursiveCheckValid(permissions[key]);
+          count++;
+        }
+        if (!count) throw invalid;
+      } else if (permissions !== true) {
+        throw invalid;
+      }
+    };
+    recursiveCheckValid(permissions);
+    this.permissions = permissions;
   }
 
   /**

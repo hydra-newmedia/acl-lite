@@ -5,14 +5,131 @@ const Role = require('./index');
 
 test('constructor - empty permissions object', t => {
   const role = new Role();
-  t.truthy(role instanceof Role);
+  t.true(role instanceof Role);
   t.deepEqual(role.permissions, {});
 });
 
 test('constructor - multi permissions object', t => {
   const role = new Role(['a.b', 'a.b.c', 'b.c']);
-  t.truthy(role instanceof Role);
+  t.true(role instanceof Role);
   t.deepEqual(role.permissions, { a: { b: true }, b: { c: true }});
+});
+
+test('constructor - boolean', t => {
+  let role = new Role(true);
+  t.true(role instanceof Role);
+  t.true(role.permissions);
+});
+
+test('constructor - invalid permissions object', t => {
+  t.throws(() => new Role(new Date()), TypeError);
+});
+
+const mergedResult = {
+  a: {
+    b: true,
+  },
+  b: {
+    c: true,
+  },
+  x: {
+    y: true,
+  },
+};
+
+test('merge - return merged role', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  const role2 = new Role(['a.b', 'b.c.d', 'x.y']);
+  t.deepEqual(role.merge(role2), new Role(mergedResult));
+});
+
+test('merge - manipulate role on merge', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  const role2 = new Role(['a.b', 'b.c.d', 'x.y']);
+  role.merge(role2);
+  t.deepEqual(role, new Role(mergedResult));
+});
+
+test('merge - multirole', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  const role2 = new Role(['a.b', 'b.c.d', 'x.y']);
+  const role3 = new Role(['aa.bb', 'bb.cc.dd', 'xx.yy']);
+  mergedResult['aa'] = {
+    bb: true,
+  };
+  mergedResult['bb'] = {
+    cc: {
+      dd: true,
+    },
+  };
+  mergedResult['xx'] = {
+    yy: true,
+  };
+  role.merge([role2, role3]);
+  t.deepEqual(role, new Role(mergedResult));
+});
+
+test('merge - error on invalid type of roles', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  const role2 = new Date();
+  t.throws(() => role.merge(role2), TypeError);
+  t.throws(() => role.merge(role2), 'roles must be of type array or Role');
+});
+
+test('merge - error on invalid type of a role', t => {
+  const role = new Role(['a.b.c', 'b.c']);
+  const role2 = new Role(['a.b', 'b.c.d', 'x.y']);
+  const role3 = new Date();
+  t.throws(() => role.merge([role2, role3]), TypeError);
+  t.throws(() => role.merge([role2, role3]), 'roles must be of type Array.<Role>');
+});
+
+test('setPermissions - set correctly formatted permission', t => {
+  const role = new Role();
+  const permissions = {
+    a: {
+      b: {
+        c: true,
+      },
+    },
+    b: {
+      c: true,
+    },
+  };
+  role.setPermissions(permissions);
+  t.deepEqual(role.permissions, permissions);
+});
+
+test('setPermissions - error on empty sub-permission object', t => {
+  const role = new Role();
+  const permissions = {
+    a: {
+      b: {},
+    },
+    b: {
+      c: true,
+    },
+  };
+  t.throws(() => role.setPermissions(permissions), Error);
+  t.throws(() => role.setPermissions(permissions), 'invalid permissions object');
+  t.throws(() => role.setPermissions({}), Error);
+  t.throws(() => role.setPermissions({}), 'invalid permissions object');
+});
+
+test('setPermissions - error on invalid sub-permission', t => {
+  const role = new Role();
+  const permissions = {
+    a: {
+      b: false,
+    },
+    b: {
+      c: true,
+    },
+  };
+  t.throws(() => role.setPermissions(permissions), Error);
+  t.throws(() => role.setPermissions(permissions), 'invalid permissions object');
+  t.throws(() => role.setPermissions(false), Error);
+  t.throws(() => role.setPermissions(false), 'invalid permissions object');
 });
 
 test('addPermission - add string formatted permission', t => {
