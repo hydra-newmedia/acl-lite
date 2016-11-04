@@ -4,14 +4,39 @@ class Role {
 
   /**
    * Constructor for an acl-lite {Role}
-   * @param {Array.<string|Array.<string>>} [permissions] - an array of
+   * @param {Array.<string|Array.<string>>|Object} [permissions] - an array of
    * permissions to initially grant permissions to the newly created {Role}
    */
   constructor(permissions) {
     this.permissions = {};
 
-    if (permissions)
+    if (permissions.constructor === {}.constructor || permissions.constructor === Boolean)
+      this.setPermissions(permissions);
+    else if (permissions)
       permissions.map(permission => this.addPermission(permission));
+  }
+
+  /**
+   * Set preformatted permissions object (NOT array of string permissions)
+   * @param {Object} permissions - permissions object to be set
+   * @throws {Error} if the permissions object is of invalid format
+   */
+  setPermissions(permissions) {
+    const invalid = new Error('invalid permissions object', 'InvalidPermissionsObjectError');
+    const recursiveCheckValid = (permissions) => {
+      let count = 0;
+      if (permissions.constructor === {}.constructor) {
+        for (let key in permissions) {
+          recursiveCheckValid(permissions[key]);
+          count++;
+        }
+        if (!count) throw invalid;
+      } else if (permissions !== true) {
+        throw invalid;
+      }
+    };
+    recursiveCheckValid(permissions);
+    this.permissions = permissions;
   }
 
   /**
