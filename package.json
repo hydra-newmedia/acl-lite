@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/guischdi/acl-lite.git"
+    "url": "git+https://github.com/hydra-newmedia/acl-lite.git"
   },
   "keywords": [
     "acl",
@@ -19,9 +19,9 @@
   "author": "Christian Hotz <hotz@hydra-newmedia.com> (http://www.hydra-newmedia.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/guischdi/acl-lite/issues"
+    "url": "https://github.com/hydra-newmedia/acl-lite/issues"
   },
-  "homepage": "https://github.com/guischdi/acl-lite#readme",
+  "homepage": "https://github.com/hydra-newmedia/acl-lite#readme",
   "devDependencies": {
     "ava": "^0.16.0",
     "nyc": "^8.3.2"
