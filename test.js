@@ -222,6 +222,12 @@ test('hasPermission - false if no permission exists', t => {
   t.false(role.hasPermission([]));
 });
 
+test('hasPermission - false even if name duplicate on wrong level', t => {
+  const role = new Role(['a.b.c']);
+  t.false(role.hasPermission('x.y.a'));
+  t.false(role.hasPermission(['x', 'y', 'a']));
+});
+
 test('hasPermission - error if not string or array provided', t => {
   const role = new Role();
   t.throws(() => role.hasPermission(new Date()), TypeError);
