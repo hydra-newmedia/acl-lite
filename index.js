@@ -106,7 +106,7 @@ class Role {
       let key = path[0];
       if (path.length === 1) return !!permissions[key];
       if (permissions[key] === true) return true;
-      else return recursiveHasPermission(path.slice(1), permissions[key]);
+      else return recursiveHasPermission(path.slice(1), permissions[key] || {});
     };
     return recursiveHasPermission(permission);
   }
