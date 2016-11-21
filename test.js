@@ -254,6 +254,16 @@ test('checkObject - true if object satisfies permissions', t => {
     },
     b: 'test',
   }));
+
+  t.true(role.checkObject({
+    a: {
+      b: {
+        c: {
+          d: 'test',
+        },
+      },
+    },
+  }));
 });
 
 test('checkObject - false if object does not satisfiy permissions', t => {
@@ -268,16 +278,6 @@ test('checkObject - false if object does not satisfiy permissions', t => {
     },
     b: {
       c: 'test',
-    },
-  }));
-
-  t.is('a.b.c.d', role.checkObject({
-    a: {
-      b: {
-        c: {
-          d: 'test',
-        },
-      },
     },
   }));
 
@@ -331,7 +331,7 @@ test('checkObject - correct return if for sub-permissions', t => {
     },
   }, 'obj.w'));
 
-  t.is('a.b.c.d', role.checkObject({
+  t.true(role.checkObject({
     a: {
       b: {
         c: {

@@ -121,6 +121,7 @@ class Role {
    */
   checkObject(object, path = undefined) {
     const recursiveCheckObject = (object, permissions, path = '') => {
+      if (permissions === true) return true;
       if (!permissions) return path;
       if (object.constructor === {}.constructor) {
         for (let key in object) {

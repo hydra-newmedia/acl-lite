@@ -1,6 +1,6 @@
 {
   "name": "acl-lite",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "A lightweight and simple ACL module",
   "main": "index.js",
   "scripts": {
