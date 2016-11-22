@@ -35,8 +35,11 @@ class Role {
     for (let role of roles) {
       if (!(role instanceof Role))
         throw new TypeError('roles must be of type Array.<Role>');
-      for (let permission of Object.keys(role.getFlatPermissions())) {
-        this.addPermission(permission);
+      if (role.permissions === true) this.permissions = true;
+      else {
+        for (let permission of Object.keys(role.getFlatPermissions())) {
+          this.addPermission(permission);
+        }
       }
     }
     return this;
@@ -150,11 +153,11 @@ class Role {
     if (paths && paths.length > 0) {
       const helper = new Role();
       for (let path of paths) {
-        for (let permission in this.getFlatPermissions(path)) {
-          helper.addPermission(permission);
-        }
+        const pathHelper = new Role(this.hasPermission(path) ? this.getSubPermissions(path) : null);
+        helper.merge(pathHelper);
       }
-      permissions = helper.isEmpty() ? true : helper.permissions;
+      if (helper.isEmpty()) return {};
+      permissions = helper.permissions;
     }
 
     // delete all object properties no permissions ar granted for
@@ -228,6 +231,7 @@ class Role {
    */
   isEmpty(path = null) {
     let permissions = this.getSubPermissions(path);
+    if (permissions === true) return false;
     for (let permission in permissions) {
       return false;
     }
