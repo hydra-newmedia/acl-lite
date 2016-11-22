@@ -12,7 +12,7 @@ test('constructor - empty permissions object', t => {
 test('constructor - multi permissions object', t => {
   const role = new Role(['a.b', 'a.b.c', 'b.c']);
   t.true(role instanceof Role);
-  t.deepEqual(role.permissions, { a: { b: true }, b: { c: true }});
+  t.deepEqual(role.permissions, { a: { b: true }, b: { c: true } });
 });
 
 test('constructor - boolean', t => {
@@ -152,7 +152,7 @@ test('addPermission - add string formatted permission', t => {
   t.deepEqual(role.permissions, permissions);
 
   role.addPermission('a.b');
-  permissions.a.b = true ;
+  permissions.a.b = true;
   t.deepEqual(role.permissions, permissions);
 
   role.addPermission('a');
@@ -180,7 +180,7 @@ test('addPermission - add array permission', t => {
   t.deepEqual(role.permissions, permissions);
 
   role.addPermission(['a', 'b']);
-  permissions.a.b = true ;
+  permissions.a.b = true;
   t.deepEqual(role.permissions, permissions);
 
   role.addPermission(['a']);
@@ -437,8 +437,8 @@ test('filterObject - return stripped object relating to permission', t => {
   });
 });
 
-test('filterObject - return stripped object relating to sub-permission', t => {
-  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
+test('filterObject - return stripped object relating to sub-permissions', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c', 'obj.r.x']);
   const obj = {
     a: {
       b: 'test',
@@ -446,11 +446,12 @@ test('filterObject - return stripped object relating to sub-permission', t => {
     b: {
       c: 'test',
     },
+    u: 'vw',
     x: {
       y: 'test',
     },
   };
-  t.deepEqual(role.filterObject(obj, 'obj.w'), {
+  t.deepEqual(role.filterObject(obj, ['obj.w']), {
     a: {
       b: 'test',
     },
@@ -460,10 +461,37 @@ test('filterObject - return stripped object relating to sub-permission', t => {
   });
 });
 
+test('filterObject - return stripped object relating to sub-permissions', t => {
+  const role = new Role(['obj.w.a.b.c', 'obj.w.b.c', 'obj.r.x']);
+  const obj = {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+    u: 'vw',
+    x: {
+      y: 'test',
+    },
+  };
+  t.deepEqual(role.filterObject(obj, ['obj.w', 'obj.r']), {
+    a: {
+      b: 'test',
+    },
+    b: {
+      c: 'test',
+    },
+    x: {
+      y: 'test'
+    },
+  });
+});
+
 test('filterObject - return stripped object relating to leaf sub-permission', t => {
   const role = new Role(['a']);
   const obj = { x: 'test' };
-  t.deepEqual(role.filterObject(obj, 'a'), { x: 'test' });
+  t.deepEqual(role.filterObject(obj, ['a']), { x: 'test' });
 });
 
 test('filterObject - manipulate input object', t => {
@@ -490,14 +518,34 @@ test('filterObject - manipulate input object', t => {
   });
 });
 
-test('filterObject - error if no string or array path provided', t => {
+test('filterObject - error if no array of strings or array paths provided', t => {
   const role = new Role();
   t.throws(() => role.filterObject({}, new Date()), TypeError);
-  t.throws(() => role.filterObject({}, new Date()), 'path must be of type array or string');
+  t.throws(() => role.filterObject({}, new Date()), 'paths must be of type array');
+  t.throws(() => role.filterObject({}, [ new Date() ]), TypeError);
+  t.throws(() => role.filterObject({}, [ new Date() ]), 'path must be of type array or string');
 });
 
 test('filterObject - error if invalid path provided', t => {
   const role = new Role(['obj.w.a.b.c', 'obj.w.b.c']);
-  t.throws(() => role.filterObject({}, 'a.b'), Error);
-  t.throws(() => role.filterObject({}, 'a.b'), 'invalid path to sub-permission');
+  t.throws(() => role.filterObject({}, ['a.b']), Error);
+  t.throws(() => role.filterObject({}, ['a.b']), 'invalid path to sub-permission');
+});
+
+test('isEmpty - true if empty', t => {
+  const role = new Role([]);
+  t.true(role.isEmpty());
+  role.permissions = null;
+  t.true(role.isEmpty());
+  role.permissions = {};
+  t.true(role.isEmpty());
+});
+
+test('isEmpty - false if not empty', t => {
+  const role = new Role(['a']);
+  t.false(role.isEmpty());
+  role.permissions = { a: true };
+  t.false(role.isEmpty());
+  role.permissions = { a: { b: true }};
+  t.false(role.isEmpty());
 });
