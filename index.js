@@ -139,12 +139,25 @@ class Role {
   /**
    * Filter arbitrary object relating to the permission of this {Role}
    * @param {Object} object - object to be filtered
-   * @param {string|Array.<string>} [path] - path to a sub-permission the object should be filtered by
+   * @param {Array.<string|Array.<string>>} [paths] - paths to sub-permissions the object should be filtered by
    * @returns {Object} - stripped input object
    */
-  filterObject(object, path = undefined) {
-    let permissions = this.getSubPermissions(path);
+  filterObject(object, paths = undefined) {
+    // get all permissions of all paths
+    let permissions = this.permissions;
+    if (paths && !(paths instanceof Array))
+      throw new TypeError('paths must be of type array');
+    if (paths && paths.length > 0) {
+      const helper = new Role();
+      for (let path of paths) {
+        for (let permission in this.getFlatPermissions(path)) {
+          helper.addPermission(permission);
+        }
+      }
+      permissions = helper.isEmpty() ? true : helper.permissions;
+    }
 
+    // delete all object properties no permissions ar granted for
     const recursiveFilterObject = (object, permissions) => {
       if (permissions === true)
         return object;
@@ -206,6 +219,19 @@ class Role {
       permissions = permissions[key];
     }
     return permissions;
+  }
+
+  /**
+   * Check whether the role or a sub-permission has any permissions
+   * @param {string|Array.<string>} [path] - path to a sub-permission to be checked
+   * @return {boolean}
+   */
+  isEmpty(path = null) {
+    let permissions = this.getSubPermissions(path);
+    for (let permission in permissions) {
+      return false;
+    }
+    return true;
   }
 
 }
